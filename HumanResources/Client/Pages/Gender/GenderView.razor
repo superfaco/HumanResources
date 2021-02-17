@@ -1,0 +1,54 @@
+﻿@page "/gender"
+@inject HttpClient client
+@inject IJSRuntime js
+
+
+<h3 class="h3">Genders</h3>
+@if(Genders == null)
+{
+    <text>Loading...</text>
+}
+else
+{
+    <button class="btn btn-primary">Add New</button>
+    <table class="table table-dark table-primary table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Description</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(Gender gender in Genders){
+                <tr>
+                    <td>@gender.Key</td>
+                    <td>@gender.Description</td>
+                    <td><button class="btn btn-warning">Edit</button></td>
+                    <td><button class="btn btn-danger" @onclick="() => Delete(gender)">Delete</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Gender> Genders { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        Genders = await client.GetFromJsonAsync<List<Gender>>("api/gender");
+    }
+
+    private async Task Delete(Gender gender)
+    {
+        if (await js.InvokeAsync<bool>("confirm", "Are you sure you want to delete the item?"))
+        {
+            await client.DeleteAsync($"api/gender/{gender.Id}");
+            await js.InvokeAsync<bool>("alert", $"Gender {gender.Description}'s been deleted.");
+            await OnInitializedAsync();
+        }
+    }
+
+}
