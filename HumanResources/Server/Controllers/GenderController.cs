@@ -21,40 +21,75 @@ namespace HumanResources.Server.Controllers
         }
 
         [HttpGet]
-        public object Get()
+        public async Task<IActionResult> Get()
         {
-            return context.Gender;
+            try
+            {
+                return Ok(await context.Gender.ToListAsync());
+            }
+            catch (Exception)
+            {
+                return Problem();
+            }
         }
 
         [HttpGet("{id}")]
-        public object Get(long id)
+        public async Task<IActionResult> Get(long id)
         {
-            return context.Gender.First(gender => gender.Id == id);
+            try
+            {
+                return Ok(await context.Gender.FirstOrDefaultAsync(gender => gender.Id == id));
+            }
+            catch (Exception)
+            {
+                return Problem();
+            }
         }
 
         [HttpPost]
-        public object Post(Gender gender)
+        public async Task<IActionResult> Post(Gender gender)
         {
-            context.Add(gender);
-            context.SaveChanges();
-            return gender;
+            try
+            {
+                await context.AddAsync(gender);
+                await context.SaveChangesAsync();
+                return Ok(gender);
+            }
+            catch (Exception)
+            {
+                return Problem();
+            }
         }
 
         [HttpPut]
-        public object Put(Gender gender)
+        public async Task<IActionResult> Put(Gender gender)
         {
-            context.Entry(gender).State = EntityState.Modified;
-            context.SaveChanges();
-            return gender;
+            try
+            {
+                context.Entry(gender).State = EntityState.Modified;
+                await context.SaveChangesAsync();
+                return Ok(gender);
+            }
+            catch (Exception)
+            {
+                return Problem();
+            }
         }
 
         [HttpDelete("{id}")]
-        public object Delete(long id)
+        public async Task<IActionResult> Delete(long id)
         {
-            Gender g = context.Gender.First(gender => gender.Id == id);
-            context.Remove(g);
-            context.SaveChanges();
-            return g;
+            try
+            {
+                Gender g = await context.Gender.FirstOrDefaultAsync(gender => gender.Id == id);
+                context.Remove(g);
+                await context.SaveChangesAsync();
+                return Ok(g);
+            }
+            catch (Exception)
+            {
+                return Problem();
+            }
         }
     }
 }
