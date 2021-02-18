@@ -1,5 +1,52 @@
-﻿<h3>GenderEditView</h3>
+﻿@inject IJSRuntime js;
+@inject HttpClient client;
+
+@if (Gender != null)
+{
+    <h3>@Title</h3>
+
+    <EditForm Model="@Gender" OnSubmit="OnSubmit">
+        <div class="form-group">
+            <input type="hidden" id="Id" @bind-value="Gender.Id" />
+
+            <label for="Key" class="form-text">Key:</label>
+            <input type="text" class="form-control" id="Key" @bind-value="Gender.Key" />
+        </div>
+        <div class="form-group">
+            <label for="Description" class="form-text">Description:</label>
+            <input type="text" class="form-control" id="Description" @bind-value="Gender.Description" />
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary" type="button" @onclick="() => Submit()">Submit</button>
+            <button class="btn btn-light" type="button" @onclick="() => Cancel()">Cancel</button>
+        </div>
+    </EditForm>
+}
 
 @code {
+    [Parameter]
+    public Gender Gender { get; set; }
+    [Parameter]
+    public string Title { get; set; }
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
 
+    private void Cancel()
+    {
+        this.Gender = null;
+    }
+
+    private async Task Submit()
+    {
+        if(Gender.Id == null)
+        {
+            await client.PostAsJsonAsync<Gender>("api/gender", Gender);
+        }
+        else
+        {
+            await client.PutAsJsonAsync<Gender>("api/gender", Gender);
+        }
+        Gender = null;
+        await js.InvokeVoidAsync("location.replace", "http://localhost:56368/gender");
+    }
 }

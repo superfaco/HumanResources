@@ -10,8 +10,8 @@
 }
 else
 {
-    <button class="btn btn-primary">Add New</button>
-    <table class="table table-dark table-primary table-bordered table-striped">
+    <button class="btn btn-primary" @onclick="() => New()">Add New</button>
+    <table class="table table-light table-primary table-bordered table-striped">
         <thead>
             <tr>
                 <th>Key</th>
@@ -25,20 +25,35 @@ else
                 <tr>
                     <td>@gender.Key</td>
                     <td>@gender.Description</td>
-                    <td><button class="btn btn-warning">Edit</button></td>
+                    <td><button class="btn btn-warning" @onclick="() => Edit(gender)">Edit</button></td>
                     <td><button class="btn btn-danger" @onclick="() => Delete(gender)">Delete</button></td>
                 </tr>
             }
         </tbody>
     </table>
+    <GenderEditView Gender="@Gender" Title="@Title"></GenderEditView>
 }
 
 @code {
     private List<Gender> Genders { get; set; }
+    private Gender Gender { get; set; }
+    private string Title { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
         Genders = await client.GetFromJsonAsync<List<Gender>>("api/gender");
+    }
+
+    private void Edit(Gender gender)
+    {
+        this.Gender = gender;
+        this.Title = "Edit";
+    }
+
+    private void New()
+    {
+        this.Gender = new Gender { Key = "", Description = "" };
+        this.Title = "New";
     }
 
     private async Task Delete(Gender gender)
@@ -46,7 +61,7 @@ else
         if (await js.InvokeAsync<bool>("confirm", "Are you sure you want to delete the item?"))
         {
             await client.DeleteAsync($"api/gender/{gender.Id}");
-            await js.InvokeAsync<bool>("alert", $"Gender {gender.Description}'s been deleted.");
+            await js.InvokeVoidAsync("alert", $"Gender {gender.Description}'s been deleted.");
             await OnInitializedAsync();
         }
     }
